@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Todo List</title>
+    <link rel="stylesheet" href="todo.css" />
+  </head>
+  <body>
+    <h1 style="text-align: center">Todo do list Tasks</h1>
+    <div style="text-align: center">
+      <label for="taskName" style="text-align: center">Task Name</label>
+      <input type="text" id="taskName" /><br /><br />
+      <label for="Description">Description</label>
+      <input type="text" id="Description" /><br /><br />
+      <button onclick="createTask()">Add Task</button>
+    </div>
+    <h2>Current Tasks</h2>
+    <ul id="taskList"></ul>
+
+    <h2>Completed Tasks</h2>
+    <ul id="completedTaskList"></ul>
+
+    <script src="todo.js"></script>
+  </body>
+</html>
