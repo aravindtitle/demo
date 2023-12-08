@@ -27,6 +27,8 @@
     <ul id="candyList"></ul>
 
     <script>
+      const inventory = [];
+
       // Function to add a new candy item
       function addCandy() {
         const name = document.getElementById("name").value;
@@ -42,26 +44,42 @@
           quantity: quantity,
         };
 
-        // Add candy to inventory
+        inventory.push(candy);
+        updateInventoryDisplay();
+      }
+
+      // Function to update the displayed inventory
+      function updateInventoryDisplay() {
         const candyList = document.getElementById("candyList");
-        const listItem = document.createElement("li");
-        listItem.textContent = `Name: ${candy.name}, Description: ${candy.description}, Price: $${candy.price}, Quantity: ${candy.quantity}`;
+        candyList.innerHTML = "";
 
-        const buyButtons = document.createElement("div");
-        buyButtons.innerHTML = `
-        <button onclick="buyCandy('${candy.name}')">Buy 1</button>
-        <button onclick="buyCandy('${candy.name}', 2)">Buy 2</button>
-        <button onclick="buyCandy('${candy.name}', 3)">Buy 3</button>
-      `;
+        inventory.forEach((candy) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = `Name: ${candy.name}, Description: ${candy.description}, Price: $${candy.price}, Quantity: ${candy.quantity}`;
 
-        listItem.appendChild(buyButtons);
-        candyList.appendChild(listItem);
+          const buyButtons = document.createElement("div");
+          buyButtons.innerHTML = `
+          <button onclick="buyCandy('${candy.name}', 1)">Buy 1</button>
+          <button onclick="buyCandy('${candy.name}', 2)">Buy 2</button>
+          <button onclick="buyCandy('${candy.name}', 3)">Buy 3</button>
+        `;
+          listItem.appendChild(buyButtons);
+          candyList.appendChild(listItem);
+        });
       }
 
       // Function to simulate buying candy
       function buyCandy(name, quantity = 1) {
-        alert(`You bought ${quantity} ${name}(s)!`);
-        // You can implement logic here to update the quantity in the inventory
+        const candyIndex = inventory.findIndex((candy) => candy.name === name);
+        if (candyIndex !== -1) {
+          if (inventory[candyIndex].quantity >= quantity) {
+            inventory[candyIndex].quantity -= quantity;
+            updateInventoryDisplay();
+            alert(`You bought ${quantity} ${name}(s)!`);
+          } else {
+            alert(`Sorry, ${name} is out of stock.`);
+          }
+        }
       }
     </script>
   </body>
