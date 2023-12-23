@@ -15,7 +15,7 @@
       <input type="text" id="description" required /><br /><br />
 
       <label for="price">Price:</label>
-      <input type="number" id="price" step="0.01" required /><br /><br />
+      <input type="number" id="price" step="0" required /><br /><br />
 
       <label for="quantity">Quantity:</label>
       <input type="number" id="quantity" required /><br /><br />
@@ -27,16 +27,17 @@
     <ul id="candyList"></ul>
 
     <script>
-      const inventory = [];
+      const apiUrl =
+        "https://crudcrud.com/api/696cf78e805440449e1cf6917d19dc97/candies";
+      let inventory = [];
 
-      // Function to add a new candy item
+      // Function to add a new candy
       function addCandy() {
         const name = document.getElementById("name").value;
         const description = document.getElementById("description").value;
         const price = parseFloat(document.getElementById("price").value);
         const quantity = parseInt(document.getElementById("quantity").value);
 
-        // Create a new candy object
         const candy = {
           name: name,
           description: description,
@@ -44,43 +45,121 @@
           quantity: quantity,
         };
 
-        inventory.push(candy);
-        updateInventoryDisplay();
+        fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(candy),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            updateInventoryFromAPI();
+            clearInputFields();
+          })
+          .catch((error) => {
+            console.error("Error adding candy:", error);
+          });
       }
 
-      // Function to update the displayed inventory
+      // Function to retrieve inventory from the API
+      function updateInventoryFromAPI() {
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            inventory = data;
+            updateInventoryDisplay();
+            console.log("Updated Inventory:", inventory);
+          })
+          .catch((error) => {
+            console.error("Error fetching inventory:", error);
+          });
+      }
+
+      // Function to update the displayed inventory with buy buttons
       function updateInventoryDisplay() {
         const candyList = document.getElementById("candyList");
         candyList.innerHTML = "";
 
         inventory.forEach((candy) => {
           const listItem = document.createElement("li");
-          listItem.textContent = `Name: ${candy.name}, Description: ${candy.description}, Price: $${candy.price}, Quantity: ${candy.quantity}`;
+          let details = `Name: ${candy.name}  , Description: ${candy.description}, Price: ${candy.price}, Quantity: ${candy.quantity}`;
+          listItem.textContent = details;
 
-          const buyButtons = document.createElement("div");
-          buyButtons.innerHTML = `
-          <button onclick="buyCandy('${candy.name}', 1)">Buy 1</button>
-          <button onclick="buyCandy('${candy.name}', 2)">Buy 2</button>
-          <button onclick="buyCandy('${candy.name}', 3)">Buy 3</button>
-        `;
+          const buyButtons = createBuyButtons(candy._id);
           listItem.appendChild(buyButtons);
           candyList.appendChild(listItem);
         });
       }
 
-      // Function to simulate buying candy
-      function buyCandy(name, quantity = 1) {
-        const candyIndex = inventory.findIndex((candy) => candy.name === name);
-        if (candyIndex !== -1) {
-          if (inventory[candyIndex].quantity >= quantity) {
-            inventory[candyIndex].quantity -= quantity;
+      // Function to create buy buttons
+      function createBuyButtons(id) {
+        const buyButtons = document.createElement("div");
+
+        const buyButton1 = document.createElement("button");
+        buyButton1.textContent = "Buy 1";
+        buyButton1.addEventListener("click", () => buyCandy(id, 1));
+
+        buyButtons.appendChild(buyButton1);
+
+        const buyButton2 = document.createElement("button");
+        buyButton2.textContent = "Buy 2";
+        buyButton2.addEventListener("click", () => buyCandy(id, 2));
+        buyButtons.appendChild(buyButton2);
+
+        const buyButton3 = document.createElement("button");
+        buyButton3.textContent = "Buy 3";
+        buyButton3.addEventListener("click", () => buyCandy(id, 3));
+        buyButtons.appendChild(buyButton3);
+
+        return buyButtons;
+      }
+
+      // Function to buy candies
+      function buyCandy(id, quantity = 1) {
+        const candy = inventory.find((candy) => candy._id === id);
+        if (candy) {
+          if (candy.quantity >= quantity) {
+            candy.quantity -= quantity;
+            console.log("Updated Candy Object:", candy);
             updateInventoryDisplay();
-            alert(`You bought ${quantity} ${name}(s)!`);
+
+            fetch(`${apiUrl}/${id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                quantity: candy.quantity,
+                name: candy.name,
+                price: candy.price,
+                description: candy.description,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Candy updated:", candy);
+                updateInventoryFromAPI();
+              })
+              .catch((error) => {
+                console.error("Error updating candy:", error);
+              });
           } else {
-            alert(`Sorry, ${name} is out of stock.`);
+            alert(`Sorry, ${candy.name} is out of stock.`);
           }
         }
       }
+
+      // Function to clear input fields after adding candy
+      function clearInputFields() {
+        document.getElementById("name").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("quantity").value = "";
+      }
+
+      // Retrieve inventory from the API
+      updateInventoryFromAPI();
     </script>
   </body>
 </html>
