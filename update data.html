@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Appointment App</title>
+  </head>
+  <body>
+    <h1>Appointment App</h1>
+
+    <!-- Form to add appointments -->
+    <form id="appointmentForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" required="" /><br /><br />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required="" /><br /><br />
+
+      <label for="mobile">Mobile Number:</label>
+      <input type="tel" id="mobile" required="" /><br /><br />
+
+      <button type="submit">Add Appointment</button>
+    </form>
+
+    <hr />
+
+    <!-- Display appointments -->
+    <h2>Appointments</h2>
+    <ul id="appointmentList">
+      <li>
+        Name: aravind, Email: aravind@gmail.com, Mobile: sdfsfsdf
+        <button>Delete</button>
+      </li>
+    </ul>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const appointmentForm = document.getElementById("appointmentForm");
+        const appointmentList = document.getElementById("appointmentList");
+        const apiURL =
+          "https://crudcrud.com/api/a435aebd6eca40df855e18fa635a14b7/appointments";
+
+        const fetchAppointments = async () => {
+          try {
+            const response = await axios.get(apiURL);
+            const appointments = response.data;
+
+            appointmentList.innerHTML = "";
+
+            appointments.forEach((appointment) => {
+              const listItem = document.createElement("li");
+              listItem.textContent = `Name: ${appointment.name}, Email: ${appointment.email}, Mobile: ${appointment.mobile}`;
+
+              const editButton = document.createElement("button");
+              editButton.textContent = "Edit";
+              editButton.addEventListener("click", () => {
+                document.getElementById("name").value = appointment.name;
+                document.getElementById("email").value = appointment.email;
+                document.getElementById("mobile").value = appointment.mobile;
+
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.textContent = "Update Appointment";
+
+                appointmentForm.onsubmit = async (event) => {
+                  event.preventDefault();
+
+                  const updatedAppointment = {
+                    name: document.getElementById("name").value,
+                    email: document.getElementById("email").value,
+                    mobile: document.getElementById("mobile").value,
+                  };
+
+                  try {
+                    await axios.put(`${apiURL}/${appointment._id}`, updatedAppointment);
+                    // Logic to update the appointment list if required
+                    // You may need to find and update the specific appointment in the list
+                    // listItem.textContent = ... (update the list item text)
+
+                    appointmentForm.reset();
+
+                    submitButton.textContent = "Add Appointment";
+                    appointmentForm.onsubmit = async (event) => {
+                      event.preventDefault();
+
+                      const newAppointment = {
+                        name: document.getElementById("name").value,
+                        email: document.getElementById("email").value,
+                        mobile: document.getElementById("mobile").value,
+                      };
+
+                      try {
+                        const response = await axios.post(apiURL, newAppointment);
+                        const createdAppointment = response.data;
+
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `Name: ${createdAppointment.name}, Email: ${createdAppointment.email}, Mobile: ${createdAppointment.mobile}`;
+
+                        const deleteButton = document.createElement("button");
+                        deleteButton.textContent = "Delete";
+                        deleteButton.addEventListener("click", async () => {
+                          try {
+                            await axios.delete(`${apiURL}/${createdAppointment._id}`);
+                            listItem.remove();
+                          } catch (error) {
+                            console.error("Error deleting appointment:", error);
+                          }
+                        });
+
+                        const editButton = document.createElement("button");
+                        editButton.textContent = "Edit";
+                        editButton.addEventListener("click", () => {
+                          // Logic to edit the appointment (similar to above)
+                        });
+
+                        listItem.appendChild(deleteButton);
+                        listItem.appendChild(editButton);
+                        appointmentList.appendChild(listItem);
+
+                        appointmentForm.reset();
+                      } catch (error) {
+                        console.error("Error adding appointment:", error);
+                      }
+                    };
+                  } catch (error) {
+                    console.error("Error updating appointment:", error);
+                  }
+                };
+              });
+
+              const deleteButton = document.createElement("button");
+              deleteButton.textContent = "Delete";
+              deleteButton.addEventListener("click", async () => {
+                try {
+                  await
