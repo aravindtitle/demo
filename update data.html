@@ -10,13 +10,13 @@
     <!-- Form to add appointments -->
     <form id="appointmentForm">
       <label for="name">Name:</label>
-      <input type="text" id="name" required="" /><br /><br />
+      <input type="text" id="name" required /><br /><br />
 
       <label for="email">Email:</label>
-      <input type="email" id="email" required="" /><br /><br />
+      <input type="email" id="email" required /><br /><br />
 
       <label for="mobile">Mobile Number:</label>
-      <input type="tel" id="mobile" required="" /><br /><br />
+      <input type="tel" id="mobile" required /><br /><br />
 
       <button type="submit">Add Appointment</button>
     </form>
@@ -51,22 +51,21 @@
               const editButton = document.createElement("button");
               editButton.textContent = "Edit";
               editButton.addEventListener("click", () => {
-                document.getElementById("name").value = appointment.name;
-                document.getElementById("email").value = appointment.email;
-                document.getElementById("mobile").value = appointment.mobile;
+                const nameInput = document.getElementById("name");
+                const emailInput = document.getElementById("email");
+                const mobileInput = document.getElementById("mobile");
 
-                const submitButton = document.querySelector(
-                  'button[type="submit"]'
-                );
-                submitButton.textContent = "Update Appointment";
+                nameInput.value = appointment.name;
+                emailInput.value = appointment.email;
+                mobileInput.value = appointment.mobile;
 
                 appointmentForm.onsubmit = async (event) => {
                   event.preventDefault();
 
                   const updatedAppointment = {
-                    name: document.getElementById("name").value,
-                    email: document.getElementById("email").value,
-                    mobile: document.getElementById("mobile").value,
+                    name: nameInput.value,
+                    email: emailInput.value,
+                    mobile: mobileInput.value,
                   };
 
                   try {
@@ -76,8 +75,7 @@
                     );
                     fetchAppointments(); // Refresh the list after update
                     appointmentForm.reset();
-                    submitButton.textContent = "Add Appointment";
-                    appointmentForm.onsubmit = handleSubmit; // Reset form submit functionality
+                    appointmentForm.onsubmit = handleAddSubmit; // Reset form submit functionality
                   } catch (error) {
                     console.error("Error updating appointment:", error);
                   }
@@ -104,7 +102,7 @@
           }
         };
 
-        const handleSubmit = async (event) => {
+        const handleAddSubmit = async (event) => {
           event.preventDefault();
 
           const name = document.getElementById("name").value;
@@ -127,7 +125,7 @@
         };
 
         fetchAppointments(); // Fetch and display appointments initially
-        appointmentForm.addEventListener("submit", handleSubmit);
+        appointmentForm.addEventListener("submit", handleAddSubmit);
       });
     </script>
   </body>
