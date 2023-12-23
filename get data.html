@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file:///C:/Users/Luffy/Desktop/html%20journy/appointmentapp.html -->
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Appointment App</title>
+  </head>
+  <body>
+    <h1>Appointment App</h1>
+
+    <!-- Form to add appointments -->
+    <form id="appointmentForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" required="" /><br /><br />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required="" /><br /><br />
+
+      <label for="mobile">Mobile Number:</label>
+      <input type="tel" id="mobile" required="" /><br /><br />
+
+      <button type="submit">Add Appointment</button>
+    </form>
+
+    <hr />
+
+    <!-- Display appointments -->
+    <h2>Appointments</h2>
+    <ul id="appointmentList">
+      <li>
+        Name: aravind, Email: aravind@gmail.com, Mobile: sdfsfsdf<button>
+          Delete
+        </button>
+      </li>
+    </ul>
+
+    <script src="./get Appointment data_files/axios.min.js.download"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const appointmentForm = document.getElementById("appointmentForm");
+        const appointmentList = document.getElementById("appointmentList");
+        const apiURL =
+          "https://crudcrud.com/api/a435aebd6eca40df855e18fa635a14b7/appointments";
+
+        // Function to fetch appointments and display them
+        const fetchAppointments = async () => {
+          try {
+            const response = await axios.get(apiURL);
+            const appointments = response.data;
+
+            // Clear existing list before updating
+            appointmentList.innerHTML = "";
+
+            appointments.forEach((appointment) => {
+              const listItem = document.createElement("li");
+              listItem.textContent = `Name: ${appointment.name}, Email: ${appointment.email}, Mobile: ${appointment.mobile}`;
+
+              // Create delete button
+              const deleteButton = document.createElement("button");
+              deleteButton.textContent = "Delete";
+              deleteButton.addEventListener("click", async () => {
+                try {
+                  await axios.delete(`${apiURL}/${appointment._id}`);
+                  listItem.remove(); // Remove the appointment from the list
+                } catch (error) {
+                  console.error("Error deleting appointment:", error);
+                }
+              });
+
+              listItem.appendChild(deleteButton);
+              appointmentList.appendChild(listItem);
+            });
+          } catch (error) {
+            console.error("Error fetching appointments:", error);
+          }
+        };
+
+        fetchAppointments(); // Fetch and display appointments initially
+
+        appointmentForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          // Get form values
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const mobile = document.getElementById("mobile").value;
+
+          const newAppointment = {
+            name,
+            email,
+            mobile,
+          };
+
+          try {
+            const response = await axios.post(apiURL, newAppointment);
+            const createdAppointment = response.data;
+
+            const listItem = document.createElement("li");
+            listItem.textContent = `Name: ${createdAppointment.name}, Email: ${createdAppointment.email}, Mobile: ${createdAppointment.mobile}`;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", async () => {
+              try {
+                await axios.delete(`${apiURL}/${createdAppointment._id}`);
+                listItem.remove(); // Remove the appointment from the list
+              } catch (error) {
+                console.error("Error deleting appointment:", error);
+              }
+            });
+
+            listItem.appendChild(deleteButton);
+            appointmentList.appendChild(listItem);
+
+            appointmentForm.reset();
+          } catch (error) {
+            console.error("Error adding appointment:", error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
